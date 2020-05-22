@@ -1,6 +1,10 @@
 {
   "name": "chat",
   "version": "1.0.0",
+  "build": {
+    "appId": "chat-udp-application.1.0.0",
+    "productName": "Rozsicza Chat Udp"
+  },
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -11,9 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "node-notifier": "^7.0.0",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
+    "electron-builder": "^22.6.1",
     "electron": "^9.0.0"
   }
 }

@@ -59,6 +59,18 @@ server.on('listening', () => {
 });
 
 server.on('message', (msg, rinfo) => {
+    msg = msg.toString('utf-8');
+
+    if (msg.startsWith('alert:')) {
+
+        const notifier = require('node-notifier');
+        notifier.notify({
+            title: 'Figyelem!',
+            message: msg.slice(6),
+        });
+
+    }
+
     currentSocket.emit('message received', `${rinfo.address}: ${msg}`);
 });
 
@@ -77,11 +89,18 @@ server.bind(9999, '0.0.0.0');
             }
         });
 
-        win.webContents.openDevTools();
+        win.maximize();
 
         // and load the index.html of the app.
         win.loadURL('http://localhost:9998');
+
     }
 
     app.whenReady().then(createWindow);
+
+    app.on('window-all-closed', () => {
+        if(process.platform !== "darwin") {
+            app.quit();
+        }
+    })
 })();

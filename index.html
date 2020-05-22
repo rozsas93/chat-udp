@@ -3,6 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+            padding: 20px;
+            border: 1px solid gray;
+        }
+
+        #chat {
+            flex: 1;
+            overflow-y: auto;
+            border: 2px solid gray;
+            margin-bottom: 10px;
+        }
+
+        #input {
+            height: 50px;
+        }
+
+        #input input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
 
@@ -19,7 +52,9 @@
             const socket = io('http://localhost:9998');
 
             socket.on('message received', (data) => {
-                document.getElementById('chat').innerHTML += data + "<br>";
+                const chat = document.getElementById('chat');
+                chat.innerHTML += data + "<br>";
+                chat.scrollTop = chat.scrollHeight;
             });
 
             document.getElementById('message-input').addEventListener('keyup', (e) => {
