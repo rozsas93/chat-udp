@@ -3,26 +3,11 @@
  *
  * @param msg
  */
-function sendMessage(msg) {
-    const client = dgram.createSocket('udp4');
-    const data = Buffer.from(msg);
-    client.send(data, 0, data.byteLength, 9999, '192.168.0.255', function(err, bytes) {
-        client.close();
-    });
-}
-
-/**
- * data: {
- *     type: string;
- *     to: ip;
- *     data: message
- * }
- */
-function sendMessagePrivate(d) {
-    const client = dgram.createSocket('udp4');
+function sendMessage(d) {
     const data = Buffer.from(JSON.stringify(d));
+    const client = dgram.createSocket('udp4');
 
-    client.send(data, 0, data.byteLength, 9999, d.to, function(err, bytes) {
+    client.send(data, 0, data.byteLength, 9999, d.to ? d.to : '192.168.0.255', function(err, bytes) {
         client.close();
     });
 }
@@ -53,14 +38,10 @@ function handler (req, res) {
 let currentSocket;
 io.on('connection', (socket) => {
     currentSocket = socket;
+
     socket.on('send message', (data) => {
         let d = JSON.parse(data);
-
-        if (d.to) {
-            sendMessagePrivate(d);
-        } else {
-            sendMessage(data);
-        }
+        sendMessage(d);
     })
 });
 
