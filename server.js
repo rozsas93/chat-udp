@@ -5,7 +5,24 @@
  */
 function sendMessage(msg) {
     const client = dgram.createSocket('udp4');
-    client.send(Buffer.from(msg), 0, 12, 9999, '192.168.0.255', function(err, bytes) {
+    const data = Buffer.from(msg);
+    client.send(data, 0, data.byteLength, 9999, '192.168.0.255', function(err, bytes) {
+        client.close();
+    });
+}
+
+/**
+ * data: {
+ *     type: string;
+ *     to: ip;
+ *     data: message
+ * }
+ */
+function sendMessagePrivate(d) {
+    const client = dgram.createSocket('udp4');
+    const data = Buffer.from(JSON.stringify(d));
+
+    client.send(data, 0, data.byteLength, 9999, d.to, function(err, bytes) {
         client.close();
     });
 }
@@ -37,7 +54,13 @@ let currentSocket;
 io.on('connection', (socket) => {
     currentSocket = socket;
     socket.on('send message', (data) => {
-        sendMessage(data);
+        let d = JSON.parse(data);
+
+        if (d.to) {
+            sendMessagePrivate(d);
+        } else {
+            sendMessage(data);
+        }
     })
 });
 
@@ -59,19 +82,24 @@ server.on('listening', () => {
 });
 
 server.on('message', (msg, rinfo) => {
-    msg = msg.toString('utf-8');
+    msg = JSON.parse(msg.toString());
+    const {type, data} = msg;
 
-    if (msg.startsWith('alert:')) {
-
+    if(type === "alert") {
         const notifier = require('node-notifier');
         notifier.notify({
             title: 'Figyelem!',
-            message: msg.slice(6),
+            message: data
         });
-
     }
-
-    currentSocket.emit('message received', `${rinfo.address}: ${msg}`);
+    if(type === "private") {
+        const date = (new Date()).toLocaleTimeString();
+        currentSocket.emit('message received', `<i>[${date}] ${rinfo.address}: ${data}<i>`);
+    }
+    else {
+        const date = (new Date()).toLocaleTimeString();
+        currentSocket.emit('message received', `[${date}] ${rinfo.address}: ${data}`);
+    }
 });
 
 server.bind(9999, '0.0.0.0');
@@ -90,6 +118,7 @@ server.bind(9999, '0.0.0.0');
         });
 
         win.maximize();
+        win.webContents.openDevTools();
 
         // and load the index.html of the app.
         win.loadURL('http://localhost:9998');

@@ -59,10 +59,34 @@
 
             document.getElementById('message-input').addEventListener('keyup', (e) => {
                 if (e.key === "Enter") {
-                    const value = e.target.value;
+                    let value = e.target.value;
                     e.target.value = "";
 
-                    socket.emit('send message', value);
+                    let message = {
+                        type: 'message',
+                        data: value,
+                    };
+
+                    if (value.startsWith('alert:')) {
+                       message = {
+                           type: 'alert',
+                           data: value.slice(6)
+                       }
+                    }
+
+                    if (value.startsWith('private:')) {
+                        const parts = value.split(':');
+
+                        if (parts.length === 3) {
+                            message = {
+                                type: parts[0],
+                                to: parts[1],
+                                data: parts[2]
+                            }
+                        }
+                    }
+
+                    socket.emit('send message', JSON.stringify(message));
                 }
             })
         });
