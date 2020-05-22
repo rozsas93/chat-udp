@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <section id="wrapper">
+        <section id="chat"></section>
+        <section id="input">
+            <input type="text" placeholder="Üzenet..." id="message-input"/>
+        </section>
+    </section>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (e) => {
+            const socket = io('http://localhost:9998');
+
+            socket.on('message received', (data) => {
+                document.getElementById('chat').innerHTML += data + "<br>";
+            });
+
+            document.getElementById('message-input').addEventListener('keyup', (e) => {
+                if (e.key === "Enter") {
+                    const value = e.target.value;
+                    e.target.value = "";
+
+                    socket.emit('send message', value);
+                }
+            })
+        });
+
+    </script>
+</body>
+</html>
